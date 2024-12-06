@@ -15,12 +15,12 @@ public class WalletInfo {
     private String message;
     private int resstatus;
     private String localDateTime;
-    private WalletData data; // This will hold the balance and status
+    private WalletData data;
 
     @Data
     public static class WalletData {
         private BigDecimal balance;
-        private String currency; // If you want to keep this
+        private String currency;
         private String status;
         private String createdAt;
         private String updatedAt;

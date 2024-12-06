@@ -2,6 +2,7 @@ package com.hottea.ewallet.transaction.exception.handler;
 
 import com.hottea.ewallet.transaction.dto.Respond.ErrorResponse;
 import com.hottea.ewallet.transaction.exception.InsufficientAmmountException;
+import com.hottea.ewallet.transaction.exception.TransactionNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,5 +48,15 @@ public class GlobalExceptionHandler {
         errorResponse.put("errors", errors);
 
         return errorResponse;
+    }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 }

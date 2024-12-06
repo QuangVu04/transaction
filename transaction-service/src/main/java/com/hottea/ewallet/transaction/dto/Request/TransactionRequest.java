@@ -25,7 +25,6 @@ public class  TransactionRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = LabelKey.ERROR_AMOUNT_IS_REQUIRED )
     BigDecimal amount;
 
-    String transactionStatus;
     @NotBlank(message = MessageKey.VALIDATION_DESCRIPTION_NOT_BLANK )
     String description;
 }

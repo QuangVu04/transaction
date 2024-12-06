@@ -35,38 +35,33 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public RespondData<Transaction> createTransactions(TransactionRequest request) {
-        String transactionStatus = request.getTransactionStatus();
 
-        // Validate wallets and amounts
         WalletInfo fromWallet = walletClient.getBalanceById(request.getFromWalletId());
         WalletInfo toWallet = walletClient.getBalanceById(request.getToWalletId());
 
-        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestAlertException(ErrorCode.MSG1109);
-        }
 
         if (fromWallet.getData().getBalance().compareTo(request.getAmount()) < 0) {
             throw new InsufficientAmmountException();
         }
 
-        // Process wallet withdrawals and deposits
         WalletRequest withdrawRequest = new WalletRequest();
         withdrawRequest.setWalletId(request.getFromWalletId());
         withdrawRequest.setAmount(request.getAmount());
         walletClient.walletWithdraw(withdrawRequest);
+
 
         WalletRequest depositRequest = new WalletRequest();
         depositRequest.setWalletId(request.getToWalletId());
         depositRequest.setAmount(request.getAmount());
         walletClient.walletDeposit(depositRequest);
 
-        // Save transaction details
+
         Transaction transaction = new Transaction();
         transaction.setAmount(request.getAmount());
         transaction.setDescription(request.getDescription());
         transaction.setFromWalletId(request.getFromWalletId());
         transaction.setToWalletId(request.getToWalletId());
-        transaction.setTransactionStatus(transactionStatus);
+        transaction.setTransactionStatus("COMPLETED");
         transactionRepository.save(transaction);
 
         return new RespondData<>(transaction,HttpStatus.OK, LabelKey.TRANSACTION_CREATED_SUCCESSFULLY);
@@ -92,16 +87,4 @@ public class TransactionServiceImpl implements TransactionService {
         return response;
     }
 
-    public List<TransactionStatSendRespond> TransactionStatSend(String fromWalletId) {
-        List<Transaction> transactions = transactionRepository.TransactionStatSend(fromWalletId);
-
-        return transactions.stream()
-                .map(transaction -> new TransactionStatSendRespond(
-                        transaction.getToWalletId(),
-                        transaction.getUuid(),
-                        transaction.getAmount(),
-                        transaction.getCreatedAt()
-                ))
-                .collect(Collectors.toList());
-    }
 }

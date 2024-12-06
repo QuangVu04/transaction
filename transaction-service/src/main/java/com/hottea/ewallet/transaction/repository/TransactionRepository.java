@@ -23,11 +23,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER BY t.createdAt DESC")
     Page<Transaction> findTransactions(@Param("request") TransactionSearchRequest request, Pageable pageable);
 
-    @Query("SELECT t FROM Transaction t WHERE t.fromWalletId = :fromWalletId ORDER BY t.createdAt DESC")
-    List<Transaction> TransactionStatSend(@Param("fromWalletId") String fromWalletId);
-
-
-
-
-
 }
