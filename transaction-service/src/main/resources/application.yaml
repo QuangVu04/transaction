@@ -1,0 +1,26 @@
+server:
+  port: 8084
+Spring:
+  application:
+    name: transactions-service
+#  kafka:
+#    bootstrap-servers: localhost:9094 # Địa chỉ của Kafka broker
+#    consumer:
+#      group-id: transaction-group # Group ID cho consumer
+#      auto-offset-reset: earliest # Bắt đầu đọc từ offset đầu tiên nếu không có offset
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    template:
+#      default-topic: transactions-topic # Topic mặc định nếu không chỉ định
+
+  datasource:
+    url: "jdbc:mysql://localhost:3306/transactions_service"
+    username: root
+    password: Hanoi_1234
+jpa:
+  hibernate:
+    ddl-auto: update
+    show-sql: true
