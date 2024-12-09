@@ -53,7 +53,7 @@ public class TransactionController {
     }
 
     @GetMapping("/stat")
-    public ResponseData<DashboardStatRespond> getDashboardMetrics(@RequestBody DashboardStatRequest request) {
+    public ResponseData<DashboardStatRespond> getDashboardMetrics( @RequestBody DashboardStatRequest request) {
         return transactionDashboardService.getDashboardMetrics(request);
     }
 
