@@ -23,4 +23,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER BY t.createdAt DESC")
     Page<Transaction> findTransactions(@Param("request") TransactionSearchRequest request, Pageable pageable);
 
+    @Query("SELECT t FROM Transaction t WHERE " +
+            " (:fromWalletId IS NULL OR t.fromWalletId = :fromWalletId) " +
+            "AND (:#{#request.transactionStatus} IS NULL OR t.transactionStatus = :#{#request.transactionStatus}) " +
+            "AND (:#{#request.toWalletId} IS NULL OR t.toWalletId = :#{#request.toWalletId}) " +
+            "AND (:#{#request.amount} IS NULL OR t.amount = :#{#request.amount}) " +
+            "AND (:#{#request.startDate} IS NULL OR t.createdAt >= :#{#request.startDate}) " +
+            "AND (:#{#request.endDate} IS NULL OR t.createdAt <= :#{#request.endDate}) " +
+            "ORDER BY t.createdAt DESC")
+    Page<Transaction> findTransactionsUser(
+            @Param("fromWalletId") String fromWalletId,
+            @Param("request") TransactionSearchRequest request,
+            Pageable pageable);
+
 }

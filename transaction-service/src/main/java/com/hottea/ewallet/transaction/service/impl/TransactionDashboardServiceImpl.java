@@ -4,7 +4,7 @@ import com.hottea.ewallet.common.messages.LabelKey;
 import com.hottea.ewallet.transaction.common.config.message.MessageKey;
 import com.hottea.ewallet.transaction.dto.Request.DashboardStatRequest;
 import com.hottea.ewallet.transaction.dto.Respond.DashboardStatRespond;
-import com.hottea.ewallet.transaction.dto.Respond.RespondData;
+import com.hottea.ewallet.transaction.dto.Respond.ResponseData;
 import com.hottea.ewallet.transaction.dto.Respond.TransactionStatSendRespond;
 import com.hottea.ewallet.transaction.entity.Transaction;
 import com.hottea.ewallet.transaction.repository.TransactionDashboardRepository;
@@ -26,27 +26,31 @@ public class TransactionDashboardServiceImpl implements TransactionDashboardServ
     @Autowired
     private TransactionDashboardRepository transactionDashboardRepository;
 
-    public RespondData<DashboardStatRespond> getDashboardMetrics(DashboardStatRequest request) {
+    public ResponseData<DashboardStatRespond> getDashboardMetrics(DashboardStatRequest request) {
         DashboardStatRespond dashboardStatRespond = new DashboardStatRespond();
 
         Timestamp today = Timestamp.valueOf(LocalDateTime.now());
         Timestamp startOfWeek = Timestamp.valueOf(LocalDateTime.now().minus(7, ChronoUnit.DAYS));
 
-        dashboardStatRespond.setTotalTransactions(transactionDashboardRepository.TotalTransaction(request.getWalletId()));
+        dashboardStatRespond.setTotalTransactions(
+                transactionDashboardRepository.TotalTransaction(request.getWalletId())
+        );
 
-        BigDecimal weeklyDeposits = transactionDashboardRepository.WeeklyDeposits(request.getWalletId(), today, startOfWeek);
+        BigDecimal weeklyDeposits = transactionDashboardRepository.WeeklyDeposits(
+                request.getWalletId(), today, startOfWeek
+        );
+
         dashboardStatRespond.setWeeklyDeposits(weeklyDeposits != null ? weeklyDeposits : BigDecimal.ZERO);
 
-        BigDecimal weeklyWithdrawals = transactionDashboardRepository.WeeklyWithdrawals(request.getWalletId(), today, startOfWeek);
+        BigDecimal weeklyWithdrawals = transactionDashboardRepository.WeeklyWithdrawals(
+                request.getWalletId(), today, startOfWeek
+        );
         dashboardStatRespond.setWeeklyWithdrawals(weeklyWithdrawals != null ? weeklyWithdrawals : BigDecimal.ZERO);
 
-        return new RespondData<>(dashboardStatRespond, HttpStatus.OK, MessageKey.STAT_FOUND);
-    }
-
-    public RespondData<List<TransactionStatSendRespond>> TransactionStatSend(String fromWalletId) {
-        List<Transaction> transactions = transactionDashboardRepository.TransactionStatSend(fromWalletId);
-
-        List<TransactionStatSendRespond> transactionStatSendResponds = transactions.stream()
+        List<Transaction> sentTransactions = transactionDashboardRepository.TransactionStatSend(
+                request.getWalletId()
+        );
+        List<TransactionStatSendRespond> sentTransactionStats = sentTransactions.stream()
                 .map(transaction -> new TransactionStatSendRespond(
                         transaction.getToWalletId(),
                         transaction.getUuid(),
@@ -54,14 +58,12 @@ public class TransactionDashboardServiceImpl implements TransactionDashboardServ
                         transaction.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
+        dashboardStatRespond.setSentTransactions(sentTransactionStats);
 
-        return new RespondData<>(transactionStatSendResponds, HttpStatus.FOUND, LabelKey.TRANSACTION_FOUND);
-    }
-
-    public RespondData<List<TransactionStatSendRespond>> TransactionStatReceived(String fromWalletId) {
-        List<Transaction> transactions = transactionDashboardRepository.TransactionStatReceived(fromWalletId);
-
-        List<TransactionStatSendRespond> transactionStatSendResponds = transactions.stream()
+        List<Transaction> receivedTransactions = transactionDashboardRepository.TransactionStatReceived(
+                request.getWalletId()
+        );
+        List<TransactionStatSendRespond> receivedTransactionStats = receivedTransactions.stream()
                 .map(transaction -> new TransactionStatSendRespond(
                         transaction.getToWalletId(),
                         transaction.getUuid(),
@@ -69,7 +71,8 @@ public class TransactionDashboardServiceImpl implements TransactionDashboardServ
                         transaction.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
+        dashboardStatRespond.setReceivedTransactions(receivedTransactionStats);
 
-        return new RespondData<>(transactionStatSendResponds, HttpStatus.FOUND, LabelKey.TRANSACTION_FOUND);
+        return new ResponseData<>(dashboardStatRespond, HttpStatus.OK, MessageKey.STAT_FOUND);
     }
 }

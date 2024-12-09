@@ -25,9 +25,9 @@ public class Transaction implements Serializable {
 
     @Column(name="transaction_uuid", nullable = false, unique = true)
     private String uuid;
-    @Column(name = "from_wallet_id", nullable = false, unique = true)
+    @Column(name = "from_wallet_id", nullable = false)
     String fromWalletId;
-    @Column(name = "to_wallet_id",nullable = false, unique = true)
+    @Column(name = "to_wallet_id",nullable = false)
     String toWalletId;
     @Column( precision = 19, scale = 4)
     BigDecimal amount;

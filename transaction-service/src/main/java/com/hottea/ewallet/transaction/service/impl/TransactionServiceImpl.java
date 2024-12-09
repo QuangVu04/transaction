@@ -5,6 +5,7 @@ import com.hottea.ewallet.common.api.util.ErrorCode;
 import com.hottea.ewallet.common.messages.LabelKey;
 import com.hottea.ewallet.transaction.clients.WalletClient;
 import com.hottea.ewallet.transaction.common.base.ResponseDataPaging;
+import com.hottea.ewallet.transaction.common.config.message.MessageKey;
 import com.hottea.ewallet.transaction.dto.Request.TransactionRequest;
 import com.hottea.ewallet.transaction.dto.Request.TransactionSearchRequest;
 import com.hottea.ewallet.transaction.dto.Request.WalletRequest;
@@ -20,9 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -34,7 +33,7 @@ public class TransactionServiceImpl implements TransactionService {
     private WalletClient walletClient;
 
     @Override
-    public RespondData<Transaction> createTransactions(TransactionRequest request) {
+    public ResponseData<Transaction> createTransactions(TransactionRequest request) {
 
         WalletInfo fromWallet = walletClient.getBalanceById(request.getFromWalletId());
         WalletInfo toWallet = walletClient.getBalanceById(request.getToWalletId());
@@ -64,18 +63,31 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTransactionStatus("COMPLETED");
         transactionRepository.save(transaction);
 
-        return new RespondData<>(transaction,HttpStatus.OK, LabelKey.TRANSACTION_CREATED_SUCCESSFULLY);
+        return new ResponseData<>(transaction,HttpStatus.OK, MessageKey.TRANSACTION_CREATED_SUCCESSFULLY);
     }
 
-    public RespondData<Transaction> getTransactionByUuid(String uuid) {
+    public ResponseData<Transaction> getTransactionByUuid(String uuid) {
         Transaction transaction = transactionRepository.findByUuid(uuid)
                 .orElseThrow(TransactionNotFoundException::new);
 
-        return new RespondData<>(transaction,HttpStatus.FOUND, LabelKey.TRANSACTION_FOUND);
+        return new ResponseData<>(transaction,HttpStatus.FOUND, MessageKey.TRANSACTION_FOUND);
     }
 
     public ResponseDataPaging<List<Transaction>> getTransactionHistory(TransactionSearchRequest request, Pageable pageable) {
         Page<Transaction> transactionsPage = transactionRepository.findTransactions(request, pageable);
+
+        ResponseDataPaging<List<Transaction>> response = new ResponseDataPaging<>();
+        response.setData(transactionsPage.getContent());
+        response.setCurrentPage(pageable.getPageNumber());
+        response.setPageSize(pageable.getPageSize());
+        response.setTotalItems(transactionsPage.getTotalElements());
+        response.setTotalPages(transactionsPage.getTotalPages());
+
+        return response;
+    }
+
+    public ResponseDataPaging<List<Transaction>> getTransactionHistoryUser(TransactionSearchRequest request, Pageable pageable, String fromWalletId) {
+        Page<Transaction> transactionsPage = transactionRepository.findTransactionsUser(fromWalletId, request, pageable);
 
         ResponseDataPaging<List<Transaction>> response = new ResponseDataPaging<>();
         response.setData(transactionsPage.getContent());

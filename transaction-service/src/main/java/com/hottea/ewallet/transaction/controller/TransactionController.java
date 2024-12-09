@@ -5,7 +5,7 @@ import com.hottea.ewallet.transaction.dto.Request.DashboardStatRequest;
 import com.hottea.ewallet.transaction.dto.Request.TransactionRequest;
 import com.hottea.ewallet.transaction.dto.Request.TransactionSearchRequest;
 import com.hottea.ewallet.transaction.dto.Respond.DashboardStatRespond;
-import com.hottea.ewallet.transaction.dto.Respond.RespondData;
+import com.hottea.ewallet.transaction.dto.Respond.ResponseData;
 import com.hottea.ewallet.transaction.dto.Respond.TransactionStatSendRespond;
 import com.hottea.ewallet.transaction.entity.Transaction;
 import com.hottea.ewallet.transaction.service.TransactionDashboardService;
@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,12 +28,12 @@ public class TransactionController {
     private TransactionDashboardService transactionDashboardService;
 
     @PostMapping
-    public RespondData<Transaction> createTransaction(@RequestBody @Valid TransactionRequest request){
+    public ResponseData<Transaction> createTransaction(@RequestBody @Valid TransactionRequest request){
         return transactionsService.createTransactions(request);
     }
 
     @GetMapping("/{uuid}")
-    public RespondData<Transaction> getTransactionByUuid(@PathVariable String uuid) {
+    public ResponseData<Transaction> getTransactionByUuid(@PathVariable String uuid) {
         return transactionsService.getTransactionByUuid(uuid);
     }
 
@@ -45,18 +44,16 @@ public class TransactionController {
         return transactionsService.getTransactionHistory(request, pageable);
     }
 
-    @GetMapping("/recent/send/{fromWalletId}")
-    public RespondData<List<TransactionStatSendRespond>> transactionStatSend(@PathVariable String fromWalletId) {
-        return transactionDashboardService.TransactionStatSend(fromWalletId);
-    }
-
-    @GetMapping("/recent/received/{fromWalletId}")
-    public RespondData<List<TransactionStatSendRespond>> transactionStatReceived(@PathVariable String fromWalletId) {
-        return transactionDashboardService.TransactionStatReceived(fromWalletId);
+    @GetMapping("/history/{walletId}")
+    public ResponseDataPaging<List<Transaction>> getTransactionHistoryUser(
+            @PathVariable("walletId") String walletid,  // Explicit mapping
+            @ModelAttribute TransactionSearchRequest request,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return transactionsService.getTransactionHistoryUser( request, pageable, walletid);
     }
 
     @GetMapping("/stat")
-    public RespondData<DashboardStatRespond> getDashboardMetrics(@RequestBody DashboardStatRequest request) {
+    public ResponseData<DashboardStatRespond> getDashboardMetrics(@RequestBody DashboardStatRequest request) {
         return transactionDashboardService.getDashboardMetrics(request);
     }
 

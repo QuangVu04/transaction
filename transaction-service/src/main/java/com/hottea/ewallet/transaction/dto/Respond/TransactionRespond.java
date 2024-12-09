@@ -17,6 +17,4 @@ public class TransactionRespond {
     private String message;
     private Transaction transaction;
 
-
-
 }
