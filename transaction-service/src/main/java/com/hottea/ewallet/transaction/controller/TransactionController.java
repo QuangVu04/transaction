@@ -52,8 +52,10 @@ public class TransactionController {
         return transactionsService.getTransactionHistoryUser( request, pageable, walletid);
     }
 
-    @GetMapping("/stat")
-    public ResponseData<DashboardStatRespond> getDashboardMetrics( @RequestBody DashboardStatRequest request) {
+    @GetMapping("/stat/{walletId}")
+    public ResponseData<DashboardStatRespond> getDashboardMetrics(@PathVariable String walletId) {
+        DashboardStatRequest request = new DashboardStatRequest();
+        request.setWalletId(walletId);
         return transactionDashboardService.getDashboardMetrics(request);
     }
 

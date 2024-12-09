@@ -17,9 +17,9 @@ public interface TransactionDashboardRepository extends JpaRepository<Transactio
     BigDecimal WeeklyDeposits(@Param("fromWalletId") String fromWalletId,
                               @Param("today") Timestamp today,
                               @Param("startOfWeek") Timestamp startOfWeek);
-    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.toWalletId =:toWalletId " +
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.toWalletId =:fromWalletId " +
             "AND t.createdAt >= :startOfWeek AND t.createdAt <= :today")
-    BigDecimal WeeklyWithdrawals(@Param("toWalletId") String toWalletId,
+    BigDecimal WeeklyWithdrawals(@Param("fromWalletId") String fromWalletId,
                                  @Param("today") Timestamp today,
                                  @Param("startOfWeek") Timestamp startOfWeek);
 
